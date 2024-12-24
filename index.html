@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Door</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', sans-serif;
+            text-align: center;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .door-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .door {
+            cursor: pointer;
+            width: 150px;
+            height: 300px;
+            background-color: #ccc;
+            border-width: 8px;
+            border-style: solid;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: transform 0.2s ease;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+        }
+        #door1 {
+            border-color: #0000FF;
+            background: linear-gradient(45deg, #0000FF, #4444FF);
+        }
+        #door2 {
+            border-color: #FF0000;
+            background: linear-gradient(45deg, #FF0000, #FF4444);
+        }
+        #door3 {
+            border-color: #008000;
+            background: linear-gradient(45deg, #008000, #44FF44);
+        }
+        #door4 {
+            border-color: #FFD700;
+            background: linear-gradient(45deg, #FFD700, #FFFF44);
+        }
+        .door:hover {
+            transform: scale(1.1);
+        }
+        .door img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .riddle-btn, .choose-btn, .reset-btn {
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 120px;
+        }
+        .riddle-btn:hover:not(:disabled), 
+        .choose-btn:hover:not(:disabled), 
+        .reset-btn:hover {
+            background-color: #333;
+            transform: scale(1.05);
+        }
+        .riddle-btn:disabled, .choose-btn:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result, .riddle {
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: #fff;
+            min-height: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 600px;
+        }
+        .riddle {
+            font-style: italic;
+        }
+        .correct-outcome {
+            color: green;
+            font-weight: bold;
+        }
+        .bad-outcome {
+            color: red;
+            font-weight: bold;
+        }
+        .door-number {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .reset-btn {
+            background-color: #ff6b6b;
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 18px;
+            display: none;
+        }
+        .reset-btn:hover {
+            background-color: #ff5252;
+        }
+        .reset-btn.visible {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Choose Your Door</h1>
+    <p>Only 1 door is wrong, behind the others lie something nice. Which do you pick?</p>
+
+    <div class="door-container">
+        <div class="door" id="door1">
+            <span class="door-number">1</span>
+            <img src="/api/placeholder/150/200?text=1" alt="Blue Door">
+            <button class="riddle-btn" onclick="showRiddle(1)">Show Riddle</button>
+            <button class="choose-btn" onclick="chooseDoor(1)">Choose Door 1</button>
+        </div>
+        <div class="door" id="door2">
+            <span class="door-number">2</span>
+            <img src="/api/placeholder/150/200?text=2" alt="Red Door">
+            <button class="riddle-btn" onclick="showRiddle(2)">Show Riddle</button>
+            <button class="choose-btn" onclick="chooseDoor(2)">Choose Door 2</button>
+        </div>
+        <div class="door" id="door3">
+            <span class="door-number">3</span>
+            <img src="/api/placeholder/150/200?text=3" alt="Green Door">
+            <button class="riddle-btn" onclick="showRiddle(3)">Show Riddle</button>
+            <button class="choose-btn" onclick="chooseDoor(3)">Choose Door 3</button>
+        </div>
+        <div class="door" id="door4">
+            <span class="door-number">4</span>
+            <img src="/api/placeholder/150/200?text=4" alt="Yellow Door">
+            <button class="riddle-btn" onclick="showRiddle(4)">Show Riddle</button>
+            <button class="choose-btn" onclick="chooseDoor(4)">Choose Door 4</button>
+        </div>
+    </div>
+
+    <div id="riddle" class="riddle"></div>
+    <div id="result" class="result"></div>
+    <button id="resetButton" class="reset-btn" onclick="resetGame()">Play Again</button>
+
+    <script>
+        let gameEnded = false;
+
+        const disableAllButtons = () => {
+            document.querySelectorAll('.choose-btn, .riddle-btn').forEach(button => {
+                button.disabled = true;
+            });
+            document.getElementById('resetButton').classList.add('visible');
+        };
+
+        const enableAllButtons = () => {
+            document.querySelectorAll('.choose-btn, .riddle-btn').forEach(button => {
+                button.disabled = false;
+            });
+            document.getElementById('resetButton').classList.remove('visible');
+        };
+
+        const resetGame = () => {
+            document.getElementById('riddle').innerHTML = '';
+            document.getElementById('result').innerHTML = '';
+            enableAllButtons();
+            gameEnded = false;
+        };
+
+        const clearRiddle = () => {
+            document.getElementById('riddle').innerHTML = '';
+        };
+
+        const showRiddle = (doorNumber) => {
+            if (!gameEnded) {
+                clearRiddle();
+                const riddles = {
+                    1: "A man of science, never sated, in his mind, the dark elated. The stars above, he does admire, but truth is chained, by earthly fire.",
+                    2: "The beast of night with golden eye, in deepened forests does it lie. Its hunger grows, its patience thin, beware the path you dare step in.",
+                    3: "In verdant fields, where shadows play, the light of dawn begins its sway. A treasure waits, so calm, so still, for those who choose with steady will.",
+                    4: "A golden glow, a molten tide, where once the brave and foolish died. The heat will rise, the breath will cease, should you seek the dragon's peace."
+                };
+                document.getElementById('riddle').innerHTML = `<p>"${riddles[doorNumber]}"</p>`;
+            }
+        };
+
+        const chooseDoor = (doorNumber) => {
+            if (gameEnded) return;
+            
+            clearRiddle();
+            
+            const outcomes = {
+                1: '<p class="bad-outcome">You open the blue door and find... Elon Musk giving a 69-hour presentation on AI (Artificial Stupidity)! There\'s no escape...</p>',
+                2: '<p class="bad-outcome">Behind the red door, a ferocious tiger lunges at you! You barely survive, but the scars remain forever at least you still can pick other door...</p>',
+                3: '<p class="correct-outcome">Behind the green door, you find a peaceful meadow, filled with treasure and Aladdin. You\'ve chosen wisely! Now dont steal any of it!</p>',
+                4: '<p class="bad-outcome">The yellow door leads to a pool of lava. You try to back away, fortunately lava golem got your back...</p>'
+            };
+            document.getElementById('result').innerHTML = outcomes[doorNumber];
+            
+            gameEnded = true;
+            disableAllButtons();
+        };
+
+        // Initialize empty containers
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('riddle').innerHTML = '';
+            document.getElementById('result').innerHTML = '';
+        });
+    </script>
+    <h1>"A not so-funny code that tries to be funny"</h1>
+    <p>Quoute by : this programmer</p>
+</body>
+</html>
